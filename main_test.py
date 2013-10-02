@@ -4,13 +4,22 @@ from time import sleep
 from collections import deque
 import re
 
-USERNAME = "username"
-PASSWORD = "password"
 USERAGENT = "SpellCheckerBot version 1.0 by /u/thirdegree"
 SUBREDDITS = '+'.join([i for i in file('active_subs.txt').read().split('\n')])
-
 r = praw.Reddit(USERAGENT)
-r.login(USERNAME, PASSWORD)
+
+def _login():
+	USERNAME = raw_input("Username?\n> ")
+	PASSWORD = raw_input("Password?\n> ")
+	r.login(USERNAME, PASSWORD)
+
+Trying = True
+while Trying:
+	try:
+		_login()
+		Trying = False
+	except praw.errors.InvalidUserPass:
+		print "Invalid Username/password, please try again."
 
 commonly_misspelled = [i.strip() for i in file('commonly_misspelled.txt').read().split('\n')]
 banned_subs = [i.strip() for i in file('banned_subs.txt').read().split('\n')]

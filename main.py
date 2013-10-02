@@ -4,19 +4,28 @@ from time import sleep
 from collections import deque
 import re
 
-USERNAME = "username"
-PASSWORD = "password"
-VERSION = '1.4'
-USERAGENT = "SpellCheckerBot version %s by /u/thirdegree, run by /u/PM_ME_YOUR_TITS_GIRL"%VERSION
-SUBREDDITS = 'subreddits'
-
+USERAGENT = "SpellCheckerBot version 1.5 by /u/thirdegree"
+SUBREDDITS = '+'.join([i for i in file('active_subs.txt').read().split('\n')])
 r = praw.Reddit(USERAGENT)
-r.login(USERNAME, PASSWORD)
 
-commonly_misspelled = file('commonly_misspelled.txt').read().split('\n')
-banned_subs = file('banned_subs.txt').read().split('\n')
+def _login():
+	USERNAME = raw_input("Username?\n> ")
+	PASSWORD = raw_input("Password?\n> ")
+	r.login(USERNAME, PASSWORD)
+
+Trying = True
+while Trying:
+	try:
+		_login()
+		Trying = False
+	except praw.errors.InvalidUserPass:
+		print "Invalid Username/password, please try again."
+
+commonly_misspelled = [i.strip() for i in file('commonly_misspelled.txt').read().split('\n')]
+banned_subs = [i.strip() for i in file('banned_subs.txt').read().split('\n')]
 already_done = deque(maxlen=300)
-ignored_users = file('ignored_users.txt').read().split('\n')
+ignored_users = [i.strip() for i in file('ignored_users.txt').read().split('\n')]
+nominated_subs = {u'thirdegree': [0,0,1]}
 
 #checks if comment is posted in a banned subreddit
 def banned(subreddit):
@@ -45,13 +54,47 @@ def corrector(post):
 	already_done.append(post.id)
 	return corrected_list
 
+###################Allows for users to suggest subs, and mods to approve/not approve
+def add_sub_start(subreddit):
+	if subreddit not in nominated_subs:
+		nominated_subs[subreddit] = [0,0,len(r.get_moderators(subreddit))]
+		for mod in r.get_moderators(subreddit):
+			print mod
+			r.send_message(mod,'SpellCheckerBot request', 'A request has been made to add %s to the list of subs this bot runs on. If you would like to allow this, reply "Add %s" Otherwise, reply "Do not add %s" For both, capitalization matters. I require a simple majority of mods of a subreddit to allow me.'%(subreddit, subreddit, subreddit))
+			sleep(2)
+
+def check_add_sub(SUBREDDITS):
+	print nominated_subs
+	finished_subs = []
+	for sub in nominated_subs:
+		if nominated_subs[sub][0]>=(nominated_subs[sub][2]/2.0):
+			with open('active_subs.txt', 'a+') as subreddit:
+				SUBREDDITS += '+'+sub
+				subreddit.write(sub+'\n')
+			finished_subs.append(sub)
+		elif nominated_subs[sub][1]>=(nominated_subs[sub][2]/2.0):
+			finished_subs.append(sub)
+	for sub in finished_subs:
+		del nominated_subs[sub]
+	return SUBREDDITS
+
+def mod_vote(vote, subreddit):
+	print "vote is " +vote
+	if vote == 'yes':
+		nominated_subs[subreddit][0] += 1
+	if vote == 'no':
+		nominated_subs[subreddit][1] += 1
+##################
+
 #Easter eggs, manual control, and posting are in here.
 running = True
 while running:	
+	#Checks if any subs have finished the voating process
+	SUBREDDITS = check_add_sub(SUBREDDITS)
 	#Checks inbox for new messages (stop checking me, easter eggs, manual control by thirdegree and pm_me_your_tits)
 	inbox = r.get_unread()
 	print "\n\nChecking inbox"
-	for post in inbox:
+	for post in inbox: 
 		if (post.body == "Quit spellchecking me") and (post.author.name not in ignored_users):
 			post.reply("I'll stop spellchecking you.")
 			print "Ignoring user " + post.author.name
@@ -75,6 +118,21 @@ while running:
 				banned_subs.append(sub)
 				with open('banned_subs.txt', 'a+') as banned:
 					banned.write(sub+'\n')
+		#anyone can suggest a subreddit to add
+		elif ("suggest subreddit:" in post.body.lower().strip()) and (post.author.name not in ignored_users):
+			add_sub_start(post.body.strip().split()[post.body.lower().strip().split().index('subreddit:')+1])
+			post.reply("Subreddit suggested")
+			print "Suggesting subreddit"
+		##### mod voting yay or nay for their subreddit to be spellchecked
+		elif ("Add " in post.body.strip()) and (post.author.name in [person.name for person in r.get_moderators(post.body.strip().split()[1])]):
+			if post.body.strip().split()[1] in nominated_subs:
+				mod_vote('yes', post.body.strip().split()[1])
+				post.reply("Your vote has been counted")
+		elif ("Do not add " in post.body.strip()) and (post.author.name in [person.name for person in r.get_moderators(post.body.strip().split()[3])]):
+			if post.body.strip().split()[3] in nominated_subs:
+				mod_vote('no',post.body.strip().split()[3])
+				post.reply("Your vote has been counted")
+		#####
 		#next four are easter eggs
 		elif ("are you a bot" in post.body.lower().strip()) and (post.author.name not in ignored_users):
 			post.reply("Yes, I am a bot. [Here's a link to my wiki!](http://www.reddit.com/r/SpellCheckerBot/wiki/index).")
@@ -99,7 +157,7 @@ while running:
 			if '[serious]' not in post.link_title.lower():
 				corrected_list = corrector(post)
 				if corrected_list != []:
-					post.reply(' '.join(corrected_list)+'\n_____\n\n\n[Questions?](http://www.reddit.com/r/SpellCheckerBot/wiki/index) [Suggestions? Complaints?](http://www.reddit.com/r/SpellCheckerBot)\n\nReply "Quit spellchecking me" to make me stop.')
+					post.reply(' '.join(corrected_list)+'\n_____\n\n\n[Questions?](http://www.reddit.com/r/SpellCheckerBot/wiki/index) [Suggestions? Complaints?](http://www.reddit.com/r/SpellCheckerBot)\n\nReply "Quit spellchecking me" to make me stop, or "Suggest subreddit: [subreddit name]" to suggest a subreddit.')
 					sleep(10)
 	except praw.errors.RateLimitExceeded:
 		print "Rate limit exceeded, sleeping 10 min"

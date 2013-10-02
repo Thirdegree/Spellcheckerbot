@@ -6,9 +6,10 @@ Features (main):
 	ignores [serious] posts
 	ignores users who ask it to
 	odd easter eggs
+	users can suggest subreddits for the bot, requires a majority of a sub's mods to ok it
 
 main_test only:
-	users can suggest subreddits for the bot, requires a majority of a sub's mods to ok it
+	identical to main atm
 
 
 main.py should always work. main_test.py will probably work, but no promises.
