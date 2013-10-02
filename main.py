@@ -4,11 +4,11 @@ from time import sleep
 from collections import deque
 import re
 
-USERNAME = "thirds_test_bot"
-PASSWORD = "thirds_test_bot_password"
+USERNAME = "username"
+PASSWORD = "password"
 VERSION = '1.4'
 USERAGENT = "SpellCheckerBot version %s by /u/thirdegree, run by /u/PM_ME_YOUR_TITS_GIRL"%VERSION
-SUBREDDITS = 'thirdegree'
+SUBREDDITS = 'subreddits'
 
 r = praw.Reddit(USERAGENT)
 r.login(USERNAME, PASSWORD)

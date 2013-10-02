@@ -4,8 +4,8 @@ from time import sleep
 from collections import deque
 import re
 
-USERNAME = "thirds_test_bot"
-PASSWORD = "thirds_test_bot_password"
+USERNAME = "username"
+PASSWORD = "password"
 USERAGENT = "SpellCheckerBot version 1.0 by /u/thirdegree"
 SUBREDDITS = '+'.join([i for i in file('active_subs.txt').read().split('\n')])
 
