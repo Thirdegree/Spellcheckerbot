@@ -5,7 +5,7 @@ from collections import deque
 import re
 
 USERAGENT = "SpellCheckerBot version 1.0 by /u/thirdegree"
-SUBREDDITS = '+'.join([i for i in file('active_subs.txt').read().split('\n')])
+SUBREDDITS = '+'.join([i.strip() for i in file('active_subs.txt').read().split('\n')])
 r = praw.Reddit(USERAGENT)
 
 def _login():
