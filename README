@@ -1,7 +1,14 @@
-Features:
+My only requests if you use this code is that you change the useragent to reflect who is running it, you leave the attribution, and if you make changes you make it clear what and where the changes are.
+
+Features (main):
 	SpellCheck
 	Manual control by selected users from reddit (adding ignored users, subreddits)
 	ignores [serious] posts
-	users can suggest subreddits for the bot, requires a majority of a sub's mods to ok it
 	ignores users who ask it to
 	odd easter eggs
+
+main_test only:
+	users can suggest subreddits for the bot, requires a majority of a sub's mods to ok it
+
+
+main.py should always work. main_test.py will probably work, but no promises.
