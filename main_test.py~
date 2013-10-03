@@ -4,22 +4,13 @@ from time import sleep
 from collections import deque
 import re
 
+USERNAME = "thirds_test_bot"
+PASSWORD = "thirds_test_bot_password"
 USERAGENT = "SpellCheckerBot version 1.0 by /u/thirdegree"
-SUBREDDITS = '+'.join([i.strip() for i in file('active_subs.txt').read().split('\n')])
+SUBREDDITS = '+'.join([i for i in file('active_subs.txt').read().split('\n')])
+
 r = praw.Reddit(USERAGENT)
-
-def _login():
-	USERNAME = raw_input("Username?\n> ")
-	PASSWORD = raw_input("Password?\n> ")
-	r.login(USERNAME, PASSWORD)
-
-Trying = True
-while Trying:
-	try:
-		_login()
-		Trying = False
-	except praw.errors.InvalidUserPass:
-		print "Invalid Username/password, please try again."
+r.login(USERNAME, PASSWORD)
 
 commonly_misspelled = [i.strip() for i in file('commonly_misspelled.txt').read().split('\n')]
 banned_subs = [i.strip() for i in file('banned_subs.txt').read().split('\n')]
@@ -157,7 +148,7 @@ while running:
 			if '[serious]' not in post.link_title.lower():
 				corrected_list = corrector(post)
 				if corrected_list != []:
-					post.reply(' '.join(corrected_list)+'\n_____\n\n\n[Questions?](http://www.reddit.com/r/SpellCheckerBot/wiki/index) [Suggestions? Complaints?](http://www.reddit.com/r/SpellCheckerBot)\n\nReply "Quit spellchecking me" to make me stop.')
+					post.reply(' '.join(corrected_list)+'\n_____\n\n\n[Questions?](http://www.reddit.com/r/SpellCheckerBot/wiki/index) [Suggestions? Complaints?](http://www.reddit.com/r/SpellCheckerBot)\n\nReply "Quit spellchecking me" to make me stop, or "Suggest subreddit: [subreddit name]" to suggest a subreddit.')
 					sleep(10)
 	except praw.errors.RateLimitExceeded:
 		print "Rate limit exceeded, sleeping 10 min"

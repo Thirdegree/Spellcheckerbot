@@ -157,7 +157,7 @@ while running:
 			if '[serious]' not in post.link_title.lower():
 				corrected_list = corrector(post)
 				if corrected_list != []:
-					post.reply(' '.join(corrected_list)+'\n_____\n\n\n[Questions?](http://www.reddit.com/r/SpellCheckerBot/wiki/index) [Suggestions? Complaints?](http://www.reddit.com/r/SpellCheckerBot)\n\nReply "Quit spellchecking me" to make me stop, or "Suggest subreddit: [subreddit name]" to suggest a subreddit.')
+					post.reply(' '.join(corrected_list)+'\n_____\n\n\n[Questions?](http://www.reddit.com/r/SpellCheckerBot/wiki/index) [Suggestions? Complaints?](http://www.reddit.com/r/SpellCheckerBot)\n\nReply "Quit spellchecking me" to make me stop.')
 					sleep(10)
 	except praw.errors.RateLimitExceeded:
 		print "Rate limit exceeded, sleeping 10 min"
