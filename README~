@@ -1,7 +1,0 @@
-Features:
-	SpellCheck
-	Manual control by selected users from reddit (adding ignored users, subreddits)
-	ignores [serious] posts
-	users can suggest subreddits for the bot, requires a majority of a sub's mods to ok it
-	ignores users who ask it to
-	odd easter eggs
