@@ -72,8 +72,10 @@ def check_add_sub(SUBREDDITS):
 				SUBREDDITS += '+'+sub
 				subreddit.write(sub+'\n')
 			finished_subs.append(sub)
+			r.send_message('/r/'+sub, "Your subreddit has been added to the list of SpellChecked subs", "The majority of your sub's moderators have voted in favor of allowing this bot")
 		elif nominated_subs[sub][1]>=(nominated_subs[sub][2]/2.0):
 			finished_subs.append(sub)
+			r.send_message('/r/'+sub, "Your subreddit has not been added to the list of SPellChecked subs", "The majority of your sub's moderators have voted against allowing this bot")
 	for sub in finished_subs:
 		del nominated_subs[sub]
 	return SUBREDDITS
@@ -125,11 +127,11 @@ while running:
 			print "Suggesting subreddit"
 		##### mod voting yay or nay for their subreddit to be spellchecked
 		elif ("Add " in post.body.strip()) and (post.author.name in [person.name for person in r.get_moderators(post.body.strip().split()[1])]):
-			if post.body.strip().split()[1] in nominated_subs:
+			if post.body.strip().split()[1].lower() in nominated_subs:
 				mod_vote('yes', post.body.strip().split()[1])
 				post.reply("Your vote has been counted")
 		elif ("Do not add " in post.body.strip()) and (post.author.name in [person.name for person in r.get_moderators(post.body.strip().split()[3])]):
-			if post.body.strip().split()[3] in nominated_subs:
+			if post.body.strip().split()[3].lower() in nominated_subs:
 				mod_vote('no',post.body.strip().split()[3])
 				post.reply("Your vote has been counted")
 		#####
