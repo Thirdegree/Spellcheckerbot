@@ -4,7 +4,7 @@ from time import sleep
 from collections import deque
 import re
 
-USERAGENT = "SpellCheckerBot version 1.0 by /u/thirdegree"
+USERAGENT = "SpellCheckerBot version 1.5 by /u/thirdegree"
 SUBREDDITS = '+'.join([i.strip() for i in file('active_subs.txt').read().split('\n')])
 r = praw.Reddit(USERAGENT)
 
@@ -25,7 +25,7 @@ commonly_misspelled = [i.strip() for i in file('commonly_misspelled.txt').read()
 banned_subs = [i.strip() for i in file('banned_subs.txt').read().split('\n')]
 already_done = deque(maxlen=300)
 ignored_users = [i.strip() for i in file('ignored_users.txt').read().split('\n')]
-nominated_subs = {u'thirdegree': [0,0,1]}
+nominated_subs = {}
 
 #checks if comment is posted in a banned subreddit
 def banned(subreddit):
@@ -60,7 +60,7 @@ def add_sub_start(subreddit):
 		nominated_subs[subreddit] = [0,0,len(r.get_moderators(subreddit))]
 		for mod in r.get_moderators(subreddit):
 			print mod
-			r.send_message(mod,'SpellCheckerBot request', 'A request has been made to add %s to the list of subs this bot runs on. If you would like to allow this, reply "Add %s" Otherwise, reply "Do not add %s" For both, capitalization matters. I require a simple majority of mods of a subreddit to allow me.'%(subreddit, subreddit, subreddit))
+			r.send_message(mod,'SpellCheckerBot request', 'A request has been made to add %s to the list of subs this bot runs on. If you would like to allow this, reply "Add %s" Otherwise, reply "Do not add %s" For both, capitalization matters. I require a simple majority of mods of a subreddit to allow me. You will recive a pm if your vote is counted.'%(subreddit, subreddit, subreddit))
 			sleep(2)
 
 def check_add_sub(SUBREDDITS):
@@ -72,8 +72,10 @@ def check_add_sub(SUBREDDITS):
 				SUBREDDITS += '+'+sub
 				subreddit.write(sub+'\n')
 			finished_subs.append(sub)
+			r.send_message('/r/'+sub, "Your subreddit has been added to the list of SpellChecked subs", "The majority of your sub's moderators have voted in favor of allowing this bot")
 		elif nominated_subs[sub][1]>=(nominated_subs[sub][2]/2.0):
 			finished_subs.append(sub)
+			r.send_message('/r/'+sub, "Your subreddit has not been added to the list of SPellChecked subs", "The majority of your sub's moderators have voted against allowing this bot")
 	for sub in finished_subs:
 		del nominated_subs[sub]
 	return SUBREDDITS
@@ -81,9 +83,9 @@ def check_add_sub(SUBREDDITS):
 def mod_vote(vote, subreddit):
 	print "vote is " +vote
 	if vote == 'yes':
-		nominated_subs[subreddit][0] += 1
+		nominated_subs[subreddit.lower()][0] += 1
 	if vote == 'no':
-		nominated_subs[subreddit][1] += 1
+		nominated_subs[subreddit.lower()][1] += 1
 ##################
 
 #Easter eggs, manual control, and posting are in here.
@@ -120,16 +122,16 @@ while running:
 					banned.write(sub+'\n')
 		#anyone can suggest a subreddit to add
 		elif ("suggest subreddit:" in post.body.lower().strip()) and (post.author.name not in ignored_users):
-			add_sub_start(post.body.strip().split()[post.body.lower().strip().split().index('subreddit:')+1])
+			add_sub_start(post.body.strip().lower().split()[post.body.lower().strip().split().index('subreddit:')+1])
 			post.reply("Subreddit suggested")
 			print "Suggesting subreddit"
 		##### mod voting yay or nay for their subreddit to be spellchecked
 		elif ("Add " in post.body.strip()) and (post.author.name in [person.name for person in r.get_moderators(post.body.strip().split()[1])]):
-			if post.body.strip().split()[1] in nominated_subs:
+			if post.body.strip().split()[1].lower() in nominated_subs:
 				mod_vote('yes', post.body.strip().split()[1])
 				post.reply("Your vote has been counted")
 		elif ("Do not add " in post.body.strip()) and (post.author.name in [person.name for person in r.get_moderators(post.body.strip().split()[3])]):
-			if post.body.strip().split()[3] in nominated_subs:
+			if post.body.strip().split()[3].lower() in nominated_subs:
 				mod_vote('no',post.body.strip().split()[3])
 				post.reply("Your vote has been counted")
 		#####
@@ -164,7 +166,7 @@ while running:
 		sleep(590)
 	except KeyboardInterrupt:
 		running = False
-	except:
+	'''except:
 		print "Unknown Reddit error, sleeping 1 min"
-		sleep(50)
+		sleep(50)'''
 	sleep(10)
