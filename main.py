@@ -122,7 +122,7 @@ while running:
 					banned.write(sub+'\n')
 		#anyone can suggest a subreddit to add
 		elif ("suggest subreddit:" in post.body.lower().strip()) and (post.author.name not in ignored_users):
-			add_sub_start(post.body.strip().split()[post.body.lower().strip().split().index('subreddit:')+1])
+			add_sub_start(post.body.strip().split()[post.body.lower().strip().split().index('subreddit:')+1].lower())
 			post.reply("Subreddit suggested")
 			print "Suggesting subreddit"
 		##### mod voting yay or nay for their subreddit to be spellchecked
