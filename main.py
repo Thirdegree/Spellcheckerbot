@@ -25,7 +25,7 @@ commonly_misspelled = [i.strip() for i in file('commonly_misspelled.txt').read()
 banned_subs = [i.strip() for i in file('banned_subs.txt').read().split('\n')]
 already_done = deque(maxlen=300)
 ignored_users = [i.strip() for i in file('ignored_users.txt').read().split('\n')]
-nominated_subs = {u'thirdegree': [0,0,1]}
+nominated_subs = {}
 
 #checks if comment is posted in a banned subreddit
 def banned(subreddit):
@@ -83,9 +83,9 @@ def check_add_sub(SUBREDDITS):
 def mod_vote(vote, subreddit):
 	print "vote is " +vote
 	if vote == 'yes':
-		nominated_subs[subreddit][0] += 1
+		nominated_subs[subreddit.lower()][0] += 1
 	if vote == 'no':
-		nominated_subs[subreddit][1] += 1
+		nominated_subs[subreddit.lower()][1] += 1
 ##################
 
 #Easter eggs, manual control, and posting are in here.
@@ -122,7 +122,7 @@ while running:
 					banned.write(sub+'\n')
 		#anyone can suggest a subreddit to add
 		elif ("suggest subreddit:" in post.body.lower().strip()) and (post.author.name not in ignored_users):
-			add_sub_start(post.body.strip().split()[post.body.lower().strip().split().index('subreddit:')+1].lower())
+			add_sub_start(post.body.strip().lower().split()[post.body.lower().strip().split().index('subreddit:')+1])
 			post.reply("Subreddit suggested")
 			print "Suggesting subreddit"
 		##### mod voting yay or nay for their subreddit to be spellchecked
@@ -166,7 +166,7 @@ while running:
 		sleep(590)
 	except KeyboardInterrupt:
 		running = False
-	except:
+	'''except:
 		print "Unknown Reddit error, sleeping 1 min"
-		sleep(50)
+		sleep(50)'''
 	sleep(10)
