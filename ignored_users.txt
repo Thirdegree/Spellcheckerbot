@@ -1,3 +1,0 @@
-thirdegree
-thirds_test_bot
-SpellCheckerBot
