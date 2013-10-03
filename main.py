@@ -60,7 +60,7 @@ def add_sub_start(subreddit):
 		nominated_subs[subreddit] = [0,0,len(r.get_moderators(subreddit))]
 		for mod in r.get_moderators(subreddit):
 			print mod
-			r.send_message(mod,'SpellCheckerBot request', 'A request has been made to add %s to the list of subs this bot runs on. If you would like to allow this, reply "Add %s" Otherwise, reply "Do not add %s" For both, capitalization matters. I require a simple majority of mods of a subreddit to allow me.'%(subreddit, subreddit, subreddit))
+			r.send_message(mod,'SpellCheckerBot request', 'A request has been made to add %s to the list of subs this bot runs on. If you would like to allow this, reply "Add %s" Otherwise, reply "Do not add %s" For both, capitalization matters. I require a simple majority of mods of a subreddit to allow me. You will recive a pm if your vote is counted.'%(subreddit, subreddit, subreddit))
 			sleep(2)
 
 def check_add_sub(SUBREDDITS):
