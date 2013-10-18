@@ -167,7 +167,7 @@ while running:
 	except KeyboardInterrupt:
 		running = False
 	except Exception as e:
-		r.send_message("thirdegree", "Spellcheckerbot error", e.args()+'\n'+e.message())
+		r.send_message("thirdegree", "Spellcheckerbot error", e.message())
 		print "Unknown Reddit error, sleeping 1 min"
 		sleep(50)
 	sleep(10)
