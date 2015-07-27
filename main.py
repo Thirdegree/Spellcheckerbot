@@ -9,9 +9,7 @@ SUBREDDITS = '+'.join([i.strip() for i in file('active_subs.txt').read().split('
 r = praw.Reddit(USERAGENT)
 
 def _login():
-	USERNAME = raw_input("Username?\n> ")
-	PASSWORD = raw_input("Password?\n> ")
-	r.login(USERNAME, PASSWORD)
+	r.login()
 
 Trying = True
 while Trying:
@@ -29,10 +27,7 @@ nominated_subs = {}
 
 #checks if comment is posted in a banned subreddit
 def banned(subreddit):
-	if subreddit in banned_subs:
-		return True
-	else:
-		return False
+	return subreddit in banned_subs
 
 #Important codework is here and in spellcheck.py. Everything in the while loop is fluffy stuff. This is the spellchecker.
 def corrector(post):
@@ -56,11 +51,12 @@ def corrector(post):
 
 ###################Allows for users to suggest subs, and mods to approve/not approve
 def add_sub_start(subreddit):
-	if subreddit not in nominated_subs:
+	if subreddit not in nominated_subs and subreddit not in banned_subs:
 		nominated_subs[subreddit] = [0,0,len(r.get_moderators(subreddit))]
 		for mod in r.get_moderators(subreddit):
 			print mod
 			r.send_message(mod,'SpellCheckerBot request', 'A request has been made to add %s to the list of subs this bot runs on. If you would like to allow this, reply "Add %s" Otherwise, reply "Do not add %s" For both, capitalization matters. I require a simple majority of mods of a subreddit to allow me. You will recive a pm if your vote is counted.'%(subreddit, subreddit, subreddit))
+			r.send_message('/r/'+ subreddit, "SpellCheckerBot request", "A vote has been initated to add %s to the list of approved subreddits."%(subreddit))
 			sleep(2)
 
 def check_add_sub(SUBREDDITS):
@@ -97,7 +93,7 @@ while running:
 	inbox = r.get_unread()
 	print "\n\nChecking inbox"
 	for post in inbox: 
-		if (post.body == "Quit spellchecking me") and (post.author.name not in ignored_users):
+		if (post.body == "Stop") and (post.author.name not in ignored_users):
 			post.reply("I'll stop spellchecking you.")
 			print "Ignoring user " + post.author.name
 			already_done.append(post.id)
@@ -126,14 +122,15 @@ while running:
 			post.reply("Subreddit suggested")
 			print "Suggesting subreddit"
 		##### mod voting yay or nay for their subreddit to be spellchecked
-		elif ("Add " in post.body.strip()) and (post.author.name in [person.name for person in r.get_moderators(post.body.strip().split()[1])]):
-			if post.body.strip().split()[1].lower() in nominated_subs:
-				mod_vote('yes', post.body.strip().split()[1])
-				post.reply("Your vote has been counted")
 		elif ("Do not add " in post.body.strip()) and (post.author.name in [person.name for person in r.get_moderators(post.body.strip().split()[3])]):
 			if post.body.strip().split()[3].lower() in nominated_subs:
 				mod_vote('no',post.body.strip().split()[3])
 				post.reply("Your vote has been counted")
+		elif ("Add " in post.body.strip()) and (post.author.name in [person.name for person in r.get_moderators(post.body.strip().split()[1])]):
+			if post.body.strip().split()[1].lower() in nominated_subs:
+				mod_vote('yes', post.body.strip().split()[1])
+				post.reply("Your vote has been counted")
+		
 		#####
 		#next four are easter eggs
 		elif ("are you a bot" in post.body.lower().strip()) and (post.author.name not in ignored_users):
@@ -159,7 +156,8 @@ while running:
 			if '[serious]' not in post.link_title.lower():
 				corrected_list = corrector(post)
 				if corrected_list != []:
-					post.reply(' '.join(corrected_list)+'\n_____\n\n\n[Questions?](http://www.reddit.com/r/SpellCheckerBot/wiki/index) [Suggestions? Complaints?](http://www.reddit.com/r/SpellCheckerBot)\n\nReply "Quit spellchecking me" to make me stop.')
+					#TODO: Change the stop to a PM link users can just click.
+					post.reply(' '.join(corrected_list)+'\n_____\n\n\n[Questions?](http://www.reddit.com/r/SpellCheckerBot/wiki/index) [Suggestions? Complaints?](http://www.reddit.com/r/SpellCheckerBot)\n\nReply "Stop" to make me stop.') 
 					sleep(10)
 	except praw.errors.RateLimitExceeded:
 		print "Rate limit exceeded, sleeping 10 min"
